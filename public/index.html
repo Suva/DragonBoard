@@ -126,6 +126,10 @@
             margin-top: -20px;
         }
 
+        .mousehide {
+            cursor: none;
+        }
+
     </style>
 
     <script>
@@ -148,6 +152,25 @@
         await refreshScores()
 
         setInterval(refreshScores, 3000)
+
+        let mouseHidden = false;
+        let mouseCount = 0;
+        document.onmousemove = function () {
+          if(mouseHidden) {
+            mouseHidden = false;
+            mouseCount = 0;
+            $(".overlay").removeClass("mousehide")
+          }
+        }
+
+        setInterval(function () {
+          if(mouseCount === 5) {
+            mouseHidden = true
+            $(".overlay").addClass("mousehide")
+          } else if (mouseCount < 5) {
+            mouseCount++
+          }
+        }, 1000)
       })()
     </script>
 
