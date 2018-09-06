@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dragon Leaderboard</title>
+    <link href="https://fonts.googleapis.com/css?family=EB+Garamond" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/player_api';
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      var tv,
+        playerDefaults = {autoplay: 0, loop: 1, autohide: 1, modestbranding: 0, rel: 0, showinfo: 0, controls: 0, disablekb: 1, enablejsapi: 0, iv_load_policy: 3};
+      var vid = {'videoId': 'lnzgYxlVJpc', 'startSeconds': 0, 'suggestedQuality': 'hd1080', loop: true}
+
+      function onYouTubePlayerAPIReady(){
+        tv = new YT.Player('tv', {events: {'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange}, playerVars: playerDefaults});
+      }
+
+      function onPlayerReady(){
+        tv.loadVideoById(vid);
+        tv.mute();
+      }
+
+      function onPlayerStateChange(e) {
+        console.log(e, e.data)
+        if (e.data === 1){
+          $('#tv').addClass('active');
+        } else if (e.data === 0){
+          tv.seekTo(0);
+        }
+      }
+
+      function vidRescale(){
+
+        var w = $(window).width()+200,
+          h = $(window).height()+200;
+
+        if (w/h > 16/9){
+          tv.setSize(w, w/16*9);
+          $('.tv .screen').css({'left': '0px'});
+        } else {
+          tv.setSize(h/9*16, h);
+          $('.tv .screen').css({'left': -($('.tv .screen').outerWidth()-w)/2});
+        }
+      }
+
+      $(window).on('load resize', function(){
+        vidRescale();
+      });
+
+    </script>
+    <style>
+        @import "//fonts.googleapis.com/css?family=Open+Sans:300";
+
+        body {
+            background: black;
+            font-size: 26pt;
+            font-family: "Open Sans", sans-serif, Arial;
+        }
+
+        .tv {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
+        }
+
+        .tv .screen {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+
+            margin: auto;
+
+            opacity: 0;
+            transition: opacity .5s;
+        }
+
+        .tv .screen.active {
+             opacity: 1;
+         }
+
+        .overlay {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            z-index: 5;
+            justify-content: center;
+            color: wheat;
+        }
+
+        .content {
+            display: inline-block;
+            margin-top: 40px;
+            max-width: 1200px;
+        }
+
+        .score {
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 100%;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            margin-bottom: 40px;
+            margin-top: -20px;
+        }
+
+    </style>
+
+    <script>
+      (async () => {
+
+        async function refreshScores() {
+          let scores = await $.get("https://beta.dragonsofmugloar.com/api/v2/highscores")
+          console.log(scores)
+
+          $(".scores").empty()
+          for (let {name, score} of scores) {
+            $(".scores")
+              .append($("<div class=\"score\"></div>").append(
+                $("<div>").text(name.substr(0, 30)),
+                $("<div>").text(score)
+              ))
+          }
+        }
+
+        await refreshScores()
+
+        setInterval(refreshScores, 3000)
+      })()
+    </script>
+
+</head>
+<body>
+<div class="tv">
+    <div class="screen mute" id="tv"></div>
+    <div class="overlay">
+        <div class="content">
+            <img src="logo.png">
+            <h1>refresh.dragonsofmugloar.com</h1>
+            <div class="scores"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
